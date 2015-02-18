@@ -23,23 +23,26 @@ Image img;
 
 PImage renderedImg;
 
-float speed = 0.003;
 int margin = 0;
 String path, images_dir_path;
 float x, y, z;
   
-int numFrames = 151;  // The number of frames in the animation
-int frame = 0;
+int numFrames = 150,  // The number of frames in the animation
+    frame = 0,
+    fps = 60;
 ArrayList<Image> images = new ArrayList<Image>();
 Image[] imagesArray = new Image[numFrames];
 String[] filenames;
+int   lastTime = 0,
+      measureTimer = 0,
+      measureDelay = 200;
 
-float sensorDepth = 0, lastDepth = 0, frameLerp = 0;
+float sensorDepth = 0, lastDepth = 0, frameLerp = 0, frameFloat = 0;
      
 void setup()
 {
   size(1024, 768);
-  frameRate(60);
+  frameRate(fps);
   
   path = sketchPath;
   images_dir_path = path + "/data/klot/";
@@ -65,12 +68,23 @@ void draw()
   tracker.track();
   // Show the image
   tracker.display();
-  sensorDepth = tracker.getDepth();
   
-//  int frameInc = (int)((lastDepth-sensorDepth)*50);
-//  frame = frame + frameInc;
-  float frameFloat = (lastDepth-sensorDepth)*2;
-  frameLerp = PApplet.lerp(frameLerp, frameFloat, 0.3f);
+  
+
+  measureTimer += millis()-lastTime;
+  lastTime = millis();
+  if (measureTimer >= measureDelay) {
+    sensorDepth = tracker.getNormalizedDepth();
+    frameFloat = lastDepth-sensorDepth;
+    lastDepth = sensorDepth;
+    measureTimer = 0;
+  }
+  
+  
+  //  int frameInc = (int)((lastDepth-sensorDepth)*50);
+  //  frame = frame + frameInc;
+  
+  frameLerp = PApplet.lerp(frameLerp, frameFloat, (float)measureDelay/(float)(1000 * fps));
   frame = frame + (int)frameLerp;
   if (frame>=numFrames){
    frame=0;
@@ -78,14 +92,14 @@ void draw()
   else if (frame < 0) {
     frame = numFrames-1; 
   }
-  lastDepth = sensorDepth;
+  
   
   //  image(images.get(frame).img, 0, 0, images.get(frame).dimensions.x, images.get(frame).dimensions.y);
   image(imagesArray[frame].img, 0, 0, imagesArray[frame].dimensions.x, imagesArray[frame].dimensions.y);
   // Display some info
   int t = tracker.getThreshold();
   fill(0);
-  text("threshold: " + t + "    " +  "framerate: " + (int)frameRate + "    " + "UP increase threshold, DOWN decrease threshold. Depth :" + frameLerp,10,600);
+  text("threshold: " + t + "    " +  "framerate: " + (int)frameRate + "    " + "UP increase threshold, DOWN decrease threshold. Depth :" + frameFloat,10,600);
 }  
 
 void keyPressed() {

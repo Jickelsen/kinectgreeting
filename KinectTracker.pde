@@ -89,7 +89,7 @@ class KinectTracker {
     return dep;
   }
   
-  float getLerpedDepth() {
+  float getNormalizedDepth() {
     float returnValue = lerpedDep/threshold;
     if (returnValue > 1) {
       return 1.0; 
