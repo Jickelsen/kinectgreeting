@@ -1,3 +1,5 @@
+// Modified by Jacob Michelsen tii.se February 2015. ORIGINAL CREDITS:
+
 //This code is modded from Sequential by James Patterson. 
 //Displaying a sequence of images creates the illusion of motion.
 //Images are loaded and each is displayed individually in a loop.
@@ -20,100 +22,101 @@ KinectTracker tracker;
 // Kinect Library object
 Kinect kinect;
 Image img;
-
-PImage renderedImg;
-
-int margin = 0;
-String path, images_dir_path;
-float x, y, z;
-  
-int numFrames = 150,  // The number of frames in the animation
-    fps = 60;
+String  path, 
+        images_dir_path;
 ArrayList<Image> images = new ArrayList<Image>();
-Image[] imagesArray = new Image[numFrames];
+
 String[] filenames;
 int   lastTime = 0,
       measureTimer = 0,
-      measureDelay = 200;
+      measureDelay = 200,
+      numFrames = 150,  // The number of frames in the animation
+      fps = 60;
+      
+Image[] imagesArray = new Image[numFrames];
 
-float sensorDepth = 0, lastDepth = 0, frame = 0, frameLerp = 0, frameFloat = 0, displayValue = 0;
-float speed = 25.0;
+float 
+      sensorDepth = 0,
+      frame = 0, 
+      frameLerp = 0, 
+      displayValue = 0;
+
+boolean showTracker = true;
      
-void setup()
-{
+void setup() {
   size(1024, 768);
   frameRate(fps);
-  
   path = sketchPath;
   images_dir_path = path + "/data/klot/";
   filenames = findImgFiles(listFileNames(images_dir_path));
   println(filenames);
    for (int i = 0; i < numFrames; i++) {
-//    images.add(new Image(images_dir_path+filenames[i], 1520));
       imagesArray[i] = new Image(images_dir_path+filenames[i], 1024);
   }
   kinect = new Kinect(this);
-  tracker = new KinectTracker();
+  tracker = new KinectTracker(370, 745);
   ragdollsetup();
-  
 }
   
-void draw()
-{
-  
+void draw() {
   background(255,125,0);
   ragdolldraw();
-  
-  // Run the tracking analysis
-  tracker.track();
-  // Show the image
-  tracker.display();
-  
-  
-
   measureTimer += millis()-lastTime;
   lastTime = millis();
   if (measureTimer >= measureDelay) {
+    // Run the tracking analysis
+    tracker.track();
     sensorDepth = tracker.getNormalizedDepth();
-    frameFloat = lastDepth-sensorDepth;
-    lastDepth = sensorDepth;
     measureTimer = 0;
-//    displayValue = frameFloat;
   }
-  
-  
-  //  int frameInc = (int)((lastDepth-sensorDepth)*50);
-  //  frame = frame + frameInc;
-  
-  frameLerp = PApplet.lerp(frameLerp, frameFloat, 1000.0/(float)(measureDelay * frameRate));
-  displayValue = frameLerp;
-  frame += frameLerp*speed;
+  if (showTracker) {
+      // Show the image
+      tracker.display();
+  }
+  frameLerp = PApplet.lerp(frameLerp, sensorDepth, 1000.0/(float)(measureDelay * frameRate));
+  frame = (float)numFrames*(1-frameLerp);
+  displayValue = frame;
   if (frame>=numFrames){
    frame=0;
   }
   else if (frame < 0) {
     frame = numFrames-1; 
   }
-  
   int frameInt = (int)frame;
-  //  image(images.get(frame).img, 0, 0, images.get(frame).dimensions.x, images.get(frame).dimensions.y);
   image(imagesArray[frameInt].img, 0, 0, imagesArray[frameInt].dimensions.x, imagesArray[frameInt].dimensions.y);
   // Display some info
-  int t = tracker.getThreshold();
-  fill(0);
-  text("threshold: " + t + "    " +  "framerate: " + (int)frameRate + "    " + "UP increase threshold, DOWN decrease threshold. Depth :" + displayValue,10,600);
+  if (showTracker) {
+    int nt = tracker.getNearThreshold();
+    int ft = tracker.getFarThreshold();
+    fill(0);
+    text("Near threshold: " + nt + "  Far threshold: " + ft +  " framerate: " + (int)frameRate + "    " + "UP +far, DOWN -far, RIGHT +near, LEFT -near. Depth :" + displayValue,10,600);
+  }
 }  
 
 void keyPressed() {
-  int t = tracker.getThreshold();
+  int nt = tracker.getNearThreshold();
+  int ft = tracker.getFarThreshold();
+  float deltaFT = 2000/(ft-300);
+  float deltaNT = 2000/(nt-300);
   if (key == CODED) {
+    if (keyCode == RIGHT) {
+      nt+=deltaNT;
+      tracker.setNearThreshold(nt);
+    } 
+    else if (keyCode == LEFT) {
+      nt-=deltaNT;
+      tracker.setNearThreshold(nt);
+    }
     if (keyCode == UP) {
-      t+=5;
-      tracker.setThreshold(t);
+      ft+=deltaFT;
+      tracker.setFarThreshold(ft);
     } 
     else if (keyCode == DOWN) {
-      t-=5;
-      tracker.setThreshold(t);
+      ft-=deltaFT;
+      tracker.setFarThreshold(ft);
+    }
+    if (keyCode == SHIFT) {
+      showTracker = !showTracker; 
     }
   }
 }

@@ -5,8 +5,8 @@ class KinectTracker {
   // Size of kinect image
   int kw = 640;
   int kh = 480;
-  int threshold = 745;
-  int nearLimit = 370;
+  int nearThreshold;
+  int farThreshold;
 
   // Raw location
   PVector loc;
@@ -23,9 +23,12 @@ class KinectTracker {
 
   PImage display;
 
-  KinectTracker() {
+    KinectTracker(int pNearThreshold, int pFarThreshold) {
     kinect.start();
     kinect.enableDepth(true);
+    
+    nearThreshold = pNearThreshold;
+    farThreshold = pFarThreshold;
 
     // We could skip processing the grayscale image for efficiency
     // but this example is just demonstrating everything
@@ -57,12 +60,12 @@ class KinectTracker {
         // Grabbing the raw depth
         int rawDepth = depth[offset];
 
-        // Testing against threshold
-        if (rawDepth < threshold) {
+        // Testing against farThreshold and nearThreshold
+        if (rawDepth < farThreshold && rawDepth > nearThreshold) {
           sumX += x;
           sumY += y;
           count++;
-          depthSum += (rawDepth-nearLimit);
+          depthSum += (rawDepth-nearThreshold);
         }
       }
     }
@@ -91,7 +94,7 @@ class KinectTracker {
   }
   
   float getNormalizedDepth() {
-    float returnValue = dep/(float)(threshold-nearLimit);
+    float returnValue = dep/(float)(farThreshold-nearThreshold);
     if (returnValue > 1) {
       return 1.0; 
     }
@@ -109,7 +112,6 @@ class KinectTracker {
     // Being overly cautious here
     if (depth == null || img == null) return;
 
-    // Going to rewrite the depth image to show which pixels are in threshold
     // A lot of this is redundant, but this is just for demonstration purposes
     display.loadPixels();
     for(int x = 0; x < kw; x++) {
@@ -120,7 +122,7 @@ class KinectTracker {
         int rawDepth = depth[offset];
 
         int pix = x+y*display.width;
-        if (rawDepth < threshold) {
+        if (rawDepth < farThreshold && rawDepth > nearThreshold) {
           // A red color instead
           display.pixels[pix] = color(150,50,50);
         } 
@@ -139,11 +141,19 @@ class KinectTracker {
     kinect.quit();
   }
 
-  int getThreshold() {
-    return threshold;
+  int getNearThreshold() {
+    return nearThreshold;
   }
 
-  void setThreshold(int t) {
-    threshold =  t;
+  void setNearThreshold(int t) {
+    nearThreshold =  t;
+  }
+  
+  int getFarThreshold() {
+    return farThreshold;
+  }
+
+  void setFarThreshold(int t) {
+    farThreshold =  t;
   }
 }
