@@ -35,8 +35,7 @@ int   lastTime = 0,
       
 Image[] imagesArray = new Image[numFrames];
 
-float 
-      sensorDepth = 0,
+float sensorDepth = 0,
       frame = 0, 
       frameLerp = 0, 
       displayValue = 0;
@@ -50,7 +49,7 @@ void setup() {
   images_dir_path = path + "/data/klot/";
   filenames = findImgFiles(listFileNames(images_dir_path));
   println(filenames);
-   for (int i = 0; i < numFrames; i++) {
+  for (int i = 0; i < numFrames; i++) {
       imagesArray[i] = new Image(images_dir_path+filenames[i], 1024);
   }
   kinect = new Kinect(this);

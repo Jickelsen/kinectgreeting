@@ -4,9 +4,8 @@ class World {
   // All of our objects
   ArrayList pointMasses = new ArrayList(); 
   ArrayList circles = new ArrayList();
-  
-  // Psh. Who needs gravity!
-  float gravity = 0;
+
+  float gravity = 2000;
   
   // These variables are used to keep track of how much time is elapsed between each frame
   // they're used in the physics to maintain a certain level of accuracy and consistency

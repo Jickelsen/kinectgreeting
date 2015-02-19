@@ -60,7 +60,7 @@ class Body {
     elbowRight.attachTo(shoulder, headLength*3/2, 1, true);
     handLeft.attachTo(elbowLeft, headLength*2, 1, true);
     handRight.attachTo(elbowRight, headLength*2, 1, true);
-    pelvis.attachTo(shoulder,headLength*3.5,0.8,true);
+    pelvis.attachTo(shoulder,headLength*2.5,0.8,true);
     kneeLeft.attachTo(pelvis, headLength*2, 1, true);
     kneeRight.attachTo(pelvis, headLength*2, 1, true);
     footLeft.attachTo(kneeLeft, headLength*2, 1, true);
@@ -76,6 +76,10 @@ class Body {
     // these constraints resist flexing the legs too far up towards the body
     footLeft.attachTo(shoulder, headLength*7.5, 0.001, false);
     footRight.attachTo(shoulder, headLength*7.5, 0.001, false);
+    elbowLeft.attachTo(elbowRight, headLength*7.5, 0.001, false);
+    elbowRight.attachTo(elbowLeft, headLength*7.5, 0.001, false);
+    kneeRight.attachTo(kneeLeft, headLength*4, 0.001, false);
+    kneeLeft.attachTo(kneeRight, headLength*4, 0.001, false);
     
     // The PointMasses (and circle!) is added to the world
     world.addCircle(headCircle);
@@ -105,5 +109,12 @@ class Body {
     world.removePointMass(kneeRight);
     world.removePointMass(footLeft);
     world.removePointMass(footRight);
+  }
+  
+  PointMass GetPin() {
+    return shoulder;
+  }
+  PointMass GetHead() {
+    return head;
   }
 }
