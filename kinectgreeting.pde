@@ -28,7 +28,6 @@ String path, images_dir_path;
 float x, y, z;
   
 int numFrames = 150,  // The number of frames in the animation
-    frame = 0,
     fps = 60;
 ArrayList<Image> images = new ArrayList<Image>();
 Image[] imagesArray = new Image[numFrames];
@@ -37,7 +36,8 @@ int   lastTime = 0,
       measureTimer = 0,
       measureDelay = 200;
 
-float sensorDepth = 0, lastDepth = 0, frameLerp = 0, frameFloat = 0;
+float sensorDepth = 0, lastDepth = 0, frame = 0, frameLerp = 0, frameFloat = 0, displayValue = 0;
+float speed = 25.0;
      
 void setup()
 {
@@ -78,14 +78,16 @@ void draw()
     frameFloat = lastDepth-sensorDepth;
     lastDepth = sensorDepth;
     measureTimer = 0;
+//    displayValue = frameFloat;
   }
   
   
   //  int frameInc = (int)((lastDepth-sensorDepth)*50);
   //  frame = frame + frameInc;
   
-  frameLerp = PApplet.lerp(frameLerp, frameFloat, (float)measureDelay/(float)(1000 * fps));
-  frame = frame + (int)frameLerp;
+  frameLerp = PApplet.lerp(frameLerp, frameFloat, 1000.0/(float)(measureDelay * frameRate));
+  displayValue = frameLerp;
+  frame += frameLerp*speed;
   if (frame>=numFrames){
    frame=0;
   }
@@ -93,13 +95,13 @@ void draw()
     frame = numFrames-1; 
   }
   
-  
+  int frameInt = (int)frame;
   //  image(images.get(frame).img, 0, 0, images.get(frame).dimensions.x, images.get(frame).dimensions.y);
-  image(imagesArray[frame].img, 0, 0, imagesArray[frame].dimensions.x, imagesArray[frame].dimensions.y);
+  image(imagesArray[frameInt].img, 0, 0, imagesArray[frameInt].dimensions.x, imagesArray[frameInt].dimensions.y);
   // Display some info
   int t = tracker.getThreshold();
   fill(0);
-  text("threshold: " + t + "    " +  "framerate: " + (int)frameRate + "    " + "UP increase threshold, DOWN decrease threshold. Depth :" + frameFloat,10,600);
+  text("threshold: " + t + "    " +  "framerate: " + (int)frameRate + "    " + "UP increase threshold, DOWN decrease threshold. Depth :" + displayValue,10,600);
 }  
 
 void keyPressed() {

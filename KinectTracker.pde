@@ -6,6 +6,7 @@ class KinectTracker {
   int kw = 640;
   int kh = 480;
   int threshold = 745;
+  int nearLimit = 370;
 
   // Raw location
   PVector loc;
@@ -61,14 +62,14 @@ class KinectTracker {
           sumX += x;
           sumY += y;
           count++;
-          depthSum += rawDepth;
+          depthSum += (rawDepth-nearLimit);
         }
       }
     }
     // As long as we found something
     if (count != 0) {
       loc = new PVector(sumX/count,sumY/count);
-      dep = depthSum/count;
+      dep = depthSum/(float)count;
     }
 
     // Interpolating the location, doing it arbitrarily for now
@@ -90,7 +91,7 @@ class KinectTracker {
   }
   
   float getNormalizedDepth() {
-    float returnValue = lerpedDep/threshold;
+    float returnValue = dep/(float)(threshold-nearLimit);
     if (returnValue > 1) {
       return 1.0; 
     }
