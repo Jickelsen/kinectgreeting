@@ -21,7 +21,6 @@ import org.openkinect.processing.*;
 KinectTracker tracker;
 // Kinect Library object
 Kinect kinect;
-Image img;
 String  path, 
         images_dir_path;
 ArrayList<Image> images = new ArrayList<Image>();
@@ -31,7 +30,8 @@ int   lastTime = 0,
       measureTimer = 0,
       measureDelay = 200,
       numFrames = 150,  // The number of frames in the animation
-      fps = 60;
+      fps = 60,
+      kAngle = 15;
       
 Image[] imagesArray = new Image[numFrames];
 
@@ -89,7 +89,7 @@ void draw() {
     int nt = tracker.getNearThreshold();
     int ft = tracker.getFarThreshold();
     fill(0);
-    text("Near threshold: " + nt + "  Far threshold: " + ft +  " framerate: " + (int)frameRate + "    " + "UP +far, DOWN -far, RIGHT +near, LEFT -near. Depth :" + displayValue,10,600);
+    text("Near threshold: " + nt + "  Far threshold: " + ft +  " framerate: " + (int)frameRate + "    " + "UP: +far, DOWN: -far, RIGHT: +near, LEFT: -near. W,S: Tilt. Depth :" + displayValue,10,600);
   }
 }  
 
@@ -119,6 +119,14 @@ void keyPressed() {
       showTracker = !showTracker; 
     }
   }
+  if (key == 'w') {
+    kAngle++;
+  } else if (key == 's') {
+    kAngle--;
+  }
+  kAngle = constrain(kAngle, 0, 30);
+  kinect.tilt(kAngle);
+  
 }
 
 void stop() {

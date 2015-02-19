@@ -124,7 +124,8 @@ class KinectTracker {
         int pix = x+y*display.width;
         if (rawDepth < farThreshold && rawDepth > nearThreshold) {
           // A red color instead
-          display.pixels[pix] = color(150,50,50);
+          float colorTone = 200*((float)(farThreshold-rawDepth)/(float)(farThreshold-nearThreshold));
+          display.pixels[pix] = color(colorTone,colorTone+50,colorTone);
         } 
         else {
           display.pixels[pix] = img.pixels[offset];
