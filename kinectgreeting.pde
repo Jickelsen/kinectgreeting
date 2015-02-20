@@ -29,9 +29,11 @@ String[] filenames;
 int   lastTime = 0,
       measureTimer = 0,
       measureDelay = 200,
-      numFrames = 150,  // The number of frames in the animation
       fps = 60,
-      kAngle = 15;
+      kAngle = 15,
+      frameSkip = 2;
+      
+int numFrames = 150/frameSkip;
       
 Image[] imagesArray = new Image[numFrames];
 
@@ -43,17 +45,17 @@ float sensorDepth = 0,
 boolean showTracker = true;
      
 void setup() {
-  size(1024, 768);
+  size(1280, 720);
   frameRate(fps);
   path = sketchPath;
   images_dir_path = path + "/data/klot/";
   filenames = findImgFiles(listFileNames(images_dir_path));
   println(filenames);
   for (int i = 0; i < numFrames; i++) {
-      imagesArray[i] = new Image(images_dir_path+filenames[i], 1024);
+      imagesArray[i] = new Image(images_dir_path+filenames[i*frameSkip], 1024);
   }
   kinect = new Kinect(this);
-  tracker = new KinectTracker(370, 745);
+  tracker = new KinectTracker(370, 745, 10000);
   ragdollsetup();
 }
   
@@ -68,11 +70,12 @@ void draw() {
     sensorDepth = tracker.getNormalizedDepth();
     measureTimer = 0;
   }
-  if (showTracker) {
-      // Show the image
-      tracker.display();
+  if (tracker.detected) {
+     frameLerp = PApplet.lerp(frameLerp, sensorDepth, 1000.0/(float)(measureDelay * frameRate));
   }
-  frameLerp = PApplet.lerp(frameLerp, sensorDepth, 1000.0/(float)(measureDelay * frameRate));
+ else {
+     frameLerp = PApplet.lerp(frameLerp, 1, 1000.0/(float)(2000* frameRate));
+  }
   frame = (float)numFrames*(1-frameLerp);
   displayValue = frame;
   if (frame>=numFrames){
@@ -85,6 +88,8 @@ void draw() {
   image(imagesArray[frameInt].img, 0, 0, imagesArray[frameInt].dimensions.x, imagesArray[frameInt].dimensions.y);
   // Display some info
   if (showTracker) {
+      // Show the image
+      tracker.display();
     int nt = tracker.getNearThreshold();
     int ft = tracker.getFarThreshold();
     fill(0);
@@ -95,6 +100,7 @@ void draw() {
 void keyPressed() {
   int nt = tracker.getNearThreshold();
   int ft = tracker.getFarThreshold();
+  int dt = tracker.getDetectThreshold();
   float deltaFT = 2000/(ft-300);
   float deltaNT = 2000/(nt-300);
   if (key == CODED) {
@@ -122,6 +128,13 @@ void keyPressed() {
     kAngle++;
   } else if (key == 's') {
     kAngle--;
+  }
+  if (key == 'a') {
+    dt-=1000;
+    tracker.setDetectThreshold(dt);
+  } else if (key == 'd') {
+    dt+=1000;
+    tracker.setDetectThreshold(dt);
   }
   kAngle = constrain(kAngle, 0, 30);
   kinect.tilt(kAngle);

@@ -7,6 +7,7 @@ class KinectTracker {
   int kh = 480;
   int nearThreshold;
   int farThreshold;
+  int detectThreshold;
 
   // Raw location
   PVector loc;
@@ -20,15 +21,17 @@ class KinectTracker {
   // Depth data
   int[] depth;
 
+  boolean detected = false;
 
   PImage display;
 
-    KinectTracker(int pNearThreshold, int pFarThreshold) {
+    KinectTracker(int pNearThreshold, int pFarThreshold, int pDetectThreshold) {
     kinect.start();
     kinect.enableDepth(true);
     
     nearThreshold = pNearThreshold;
     farThreshold = pFarThreshold;
+    detectThreshold = pDetectThreshold;
 
     // We could skip processing the grayscale image for efficiency
     // but this example is just demonstrating everything
@@ -73,6 +76,8 @@ class KinectTracker {
     if (count != 0) {
       loc = new PVector(sumX/count,sumY/count);
       dep = depthSum/(float)count;
+//      dep -= dep*detectThreshold/count;
+      detected = (count > detectThreshold);
     }
 
     // Interpolating the location, doing it arbitrarily for now
@@ -125,7 +130,12 @@ class KinectTracker {
         if (rawDepth < farThreshold && rawDepth > nearThreshold) {
           // A red color instead
           float colorTone = 200*((float)(farThreshold-rawDepth)/(float)(farThreshold-nearThreshold));
-          display.pixels[pix] = color(colorTone,colorTone+50,colorTone);
+          if (detected) {
+            display.pixels[pix] = color(colorTone,colorTone+50,colorTone);
+          }
+          else {
+            display.pixels[pix] = color(colorTone+50,colorTone,colorTone);
+          }
         } 
         else {
           display.pixels[pix] = img.pixels[offset];
@@ -156,5 +166,13 @@ class KinectTracker {
 
   void setFarThreshold(int t) {
     farThreshold =  t;
+  }
+  
+  int getDetectThreshold() {
+    return detectThreshold;
+  }
+  
+  void setDetectThreshold(int t) {
+    detectThreshold =  t;
   }
 }
