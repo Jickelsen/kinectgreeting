@@ -5,6 +5,12 @@ class KinectTracker {
   // Size of kinect image
   int kw = 640;
   int kh = 480;
+  float dw = 0.3;
+  float dh = 0.3;
+  int startX;
+  int endX;
+  int startY;
+  int endY;
   int nearThreshold;
   int farThreshold;
   int detectThreshold;
@@ -25,13 +31,17 @@ class KinectTracker {
 
   PImage display;
 
-    KinectTracker(int pNearThreshold, int pFarThreshold, int pDetectThreshold) {
+    KinectTracker(int pNearThreshold, int pFarThreshold, float pDetectThreshold) {
     kinect.start();
     kinect.enableDepth(true);
     
     nearThreshold = pNearThreshold;
     farThreshold = pFarThreshold;
-    detectThreshold = pDetectThreshold;
+    detectThreshold = (int)(pDetectThreshold*kw*kh*dw*dh);
+    startX = (int)((1.0-dw)*kw/2);
+    endX = kw-startX;
+    startY = (int)((1.0-dh)*kh/2);
+    endY = kh-startY;
 
     // We could skip processing the grayscale image for efficiency
     // but this example is just demonstrating everything
@@ -55,9 +65,8 @@ class KinectTracker {
     float sumY = 0;
     float depthSum = 0;
     float count = 0;
-
-    for(int x = 0; x < kw; x++) {
-      for(int y = 0; y < kh; y++) {
+    for(int x = startX; x < endX; x++) {
+      for(int y = startY; y < endY; y++) {
         // Mirroring the image
         int offset = kw-x-1+y*kw;
         // Grabbing the raw depth
@@ -76,7 +85,7 @@ class KinectTracker {
     if (count != 0) {
       loc = new PVector(sumX/count,sumY/count);
       dep = depthSum/(float)count;
-//      dep -= dep*detectThreshold/count;
+      // dep -= dep*detectThreshold/count;
       detected = (count > detectThreshold);
     }
 
@@ -119,8 +128,8 @@ class KinectTracker {
 
     // A lot of this is redundant, but this is just for demonstration purposes
     display.loadPixels();
-    for(int x = 0; x < kw; x++) {
-      for(int y = 0; y < kh; y++) {
+    for(int x = startX; x < endX; x++) {
+      for(int y = startY; y < endY; y++) {
         // mirroring image
         int offset = kw-x-1+y*kw;
         // Raw depth

@@ -74,7 +74,7 @@ class PointMass {
 
   void draw () {
     // draw the links and points
-    stroke(0);
+    stroke(15);
     if (links.size() > 0) {
       for (int i = 0; i < links.size(); i++) {
         Link currentLink = (Link) links.get(i);

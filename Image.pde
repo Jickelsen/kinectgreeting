@@ -6,11 +6,11 @@ class Image
   Image(String filename, float startWidth)
   {
     if (!filename.equals("none") && filename != null) {
-        println("Loading image: "+filename);
+        // println("Loading image: "+filename);
         img = loadImage(filename);
         dimensions = new PVector(startWidth, startWidth*img.height/img.width);
         img.resize((int)startWidth, (int)(startWidth*img.height/img.width));
-        println("Size "+ dimensions.x + " and " + dimensions.y);
+        // println("Size "+ dimensions.x + " and " + dimensions.y);
     }
     else {
       img = loadImage("head.png");
@@ -56,7 +56,7 @@ String[] findImgFiles( String[] filenames ) {
   // and check whether the fileending is not one for images
   for( int file_i = 0; file_i < filenames.length ; file_i++ ) {
 
-    println(" looking at file "+filenames[file_i]+" checking if it might not just be a image file ");
+    // println(" looking at file "+filenames[file_i]+" checking if it might not just be a image file ");
 
     String[] curr_filenameSplit = splitTokens( filenames[ file_i], "." );
 

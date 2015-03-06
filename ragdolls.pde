@@ -66,8 +66,6 @@ void ragdollsetup() {
 }
 
 void ragdolldraw () {
-  // Color everything white so we can draw on top of it again.
-  background(255);
   
   // Update physics, draw bodies, etc.
   world.update();

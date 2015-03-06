@@ -30,10 +30,11 @@ int   lastTime = 0,
       measureTimer = 0,
       measureDelay = 200,
       fps = 60,
-      kAngle = 15,
-      frameSkip = 2;
+      kAngle = 0,
+      frameSkip = 5;
       
-int numFrames = 150/frameSkip;
+//int numFrames = 150/frameSkip;
+int numFrames = 870/frameSkip;
       
 Image[] imagesArray = new Image[numFrames];
 
@@ -48,20 +49,20 @@ void setup() {
   size(1280, 720);
   frameRate(fps);
   path = sketchPath;
-  images_dir_path = path + "/data/klot/";
+  images_dir_path = path + "/data/gbg/";
+//  images_dir_path = path + "/data/klot/";
   filenames = findImgFiles(listFileNames(images_dir_path));
-  println(filenames);
+  // println(filenames);
   for (int i = 0; i < numFrames; i++) {
       imagesArray[i] = new Image(images_dir_path+filenames[i*frameSkip], 1024);
   }
   kinect = new Kinect(this);
-  tracker = new KinectTracker(370, 745, 10000);
+  tracker = new KinectTracker(700, 1035, 0.1);
   ragdollsetup();
 }
   
 void draw() {
   background(255,125,0);
-  ragdolldraw();
   measureTimer += millis()-lastTime;
   lastTime = millis();
   if (measureTimer >= measureDelay) {
@@ -71,13 +72,14 @@ void draw() {
     measureTimer = 0;
   }
   if (tracker.detected) {
-     frameLerp = PApplet.lerp(frameLerp, sensorDepth, 1000.0/(float)(measureDelay * frameRate));
+     frameLerp = PApplet.lerp(frameLerp, bezierPoint(0.0, 0.0, 0.0, 1.0, sensorDepth) 
+, 1000.0/(float)(measureDelay * frameRate));
   }
  else {
-     frameLerp = PApplet.lerp(frameLerp, 1, 1000.0/(float)(2000* frameRate));
+     frameLerp = PApplet.lerp(frameLerp, 1, 1000.0/(float)(1000* frameRate));
   }
   frame = (float)numFrames*(1-frameLerp);
-  displayValue = frame;
+  displayValue = frameLerp;
   if (frame>=numFrames){
    frame=0;
   }
@@ -85,15 +87,17 @@ void draw() {
     frame = numFrames-1; 
   }
   int frameInt = (int)frame;
-  image(imagesArray[frameInt].img, 0, 0, imagesArray[frameInt].dimensions.x, imagesArray[frameInt].dimensions.y);
+  image(imagesArray[frameInt].img, 0, 0, imagesArray[frameInt].dimensions.x*1.15, imagesArray[frameInt].dimensions.y*1.15);
+  ragdolldraw();
   // Display some info
   if (showTracker) {
       // Show the image
       tracker.display();
     int nt = tracker.getNearThreshold();
     int ft = tracker.getFarThreshold();
+    int dt = tracker.getDetectThreshold();
     fill(0);
-    text("Near threshold: " + nt + "  Far threshold: " + ft +  " framerate: " + (int)frameRate + "    " + "UP: +far, DOWN: -far, RIGHT: +near, LEFT: -near. W,S: Tilt. Depth :" + displayValue,10,600);
+    text("Near threshold: " + nt + "  Far threshold: " + ft +  " Detect  " + dt + " framerate: " + (int)frameRate + "    " + "UP: +far, DOWN: -far, RIGHT: +near, LEFT: -near. W,S: Tilt. Depth :" + displayValue + " and depth " + sensorDepth ,10,600);
   }
 }  
 
