@@ -17,6 +17,7 @@
 
 import org.openkinect.*;
 import org.openkinect.processing.*;
+import processing.video.*;
 
 KinectTracker tracker;
 // Kinect Library object
@@ -26,70 +27,142 @@ String  path,
 ArrayList<Image> images = new ArrayList<Image>();
 
 String[] filenames;
-int   lastTime = 0,
+int   WINDOWSIZE = 1280,
+      imageSize = 1280,
+      lastTime = 0,
       measureTimer = 0,
       measureDelay = 200,
       fps = 60,
       kAngle = 0,
-      frameSkip = 5;
+      frameSkip = 4;
       
 //int numFrames = 150/frameSkip;
-int numFrames = 870/frameSkip;
+//int numFrames = 655/frameSkip;
+int numFrames = floor(371/frameSkip);
       
 Image[] imagesArray = new Image[numFrames];
+Movie greetMovie,
+      byeMovie;
 
-float sensorDepth = 0,
+float screenAspect = 16.0/9.0,
+      sensorDepth = 0,
       frame = 0, 
       frameLerp = 0, 
-      displayValue = 0;
+      displayValue = 0,
+      transp = 0.0,
+      transp2 = 0.0,
+      transpSpeed = 6;
 
 boolean showTracker = true;
+PImage bgImg;
+
+boolean showGreet = false,
+        showBye = false;
      
 void setup() {
-  size(1280, 720);
+  size(WINDOWSIZE, (int)(WINDOWSIZE/screenAspect));
   frameRate(fps);
+  greetMovie = new Movie(this, "gubb_hen.mov");
+  greetMovie.frameRate(24);
+  greetMovie.loop();
+  byeMovie = new Movie(this, "gubbhen_corner.mov");
+  byeMovie.frameRate(24);
+  byeMovie.loop();
   path = sketchPath;
-  images_dir_path = path + "/data/gbg/";
+  images_dir_path = path + "/data/jpg_gothenburg_1280/";
+//  bgImg = loadImage("bg.jpg");
+//  images_dir_path = path + "/data/gbg/";
 //  images_dir_path = path + "/data/klot/";
   filenames = findImgFiles(listFileNames(images_dir_path));
   // println(filenames);
   for (int i = 0; i < numFrames; i++) {
-      imagesArray[i] = new Image(images_dir_path+filenames[i*frameSkip], 1024);
+      imagesArray[i] = new Image(images_dir_path+filenames[i*frameSkip], imageSize);
   }
   kinect = new Kinect(this);
-  tracker = new KinectTracker(700, 1035, 0.1);
+  tracker = new KinectTracker(400, 700, 0.03);
+//  tracker = new KinectTracker(700, 1035, 0.03);
   ragdollsetup();
 }
   
 void draw() {
-  background(255,125,0);
+  background(255,255,255);
   measureTimer += millis()-lastTime;
   lastTime = millis();
+//  image(bgImg, 0, 0, imageSize*1.15, imageSize/screenAspect*1.15);
   if (measureTimer >= measureDelay) {
     // Run the tracking analysis
     tracker.track();
     sensorDepth = tracker.getNormalizedDepth();
     measureTimer = 0;
   }
-  if (tracker.detected) {
+  if (tracker.detected && sensorDepth < 0.15) {
+    frameLerp -= 1000.0/(float)(1000* frameRate);
+     if (frameLerp < 0) { frameLerp = 0;}
+  }
+  else if (tracker.detected) {
      frameLerp = PApplet.lerp(frameLerp, bezierPoint(0.0, 0.0, 0.0, 1.0, sensorDepth) 
 , 1000.0/(float)(measureDelay * frameRate));
   }
  else {
-     frameLerp = PApplet.lerp(frameLerp, 1, 1000.0/(float)(1000* frameRate));
+//     frameLerp = PApplet.lerp(frameLerp, 1, 1000.0/(float)(1000* frameRate));
+     frameLerp += 1000.0/(float)(3000* frameRate);
+     if (frameLerp > 1) { frameLerp = 1;}
   }
   frame = (float)numFrames*(1-frameLerp);
-  displayValue = frameLerp;
-  if (frame>=numFrames){
-   frame=0;
-  }
-  else if (frame < 0) {
-    frame = numFrames-1; 
-  }
+  displayValue = (int)(WINDOWSIZE/screenAspect);
+//  if (frame>=numFrames){
+//   frame=0;
+//  }
+//  else if (frame < 0) {
+//    frame = numFrames-1; 
+//  }
   int frameInt = (int)frame;
-  image(imagesArray[frameInt].img, 0, 0, imagesArray[frameInt].dimensions.x*1.15, imagesArray[frameInt].dimensions.y*1.15);
-  ragdolldraw();
+  if (frameInt == numFrames) { frameInt--;}
+  image(imagesArray[frameInt].img, 0, 0, imagesArray[frameInt].dimensions.x, imagesArray[frameInt].dimensions.y);
+//  ragdolldraw();
   // Display some info
+  if (frame <= 1) {
+    showGreet = true;
+//    greetMovie.play();
+    transp += transpSpeed;
+    if (transp > 255.0) {transp = 255.0;}
+  }
+  else if (frame > (int)(0.98*numFrames)) {
+    showBye = true;
+//    byeMovie.play();
+    transp2 += transpSpeed;
+    if (transp2 > 255.0) {transp2 = 255.0;}
+    tint(255, transp2);
+  }
+  else {
+    transp -= transpSpeed;
+    if (transp < 0.0) {
+        transp = 0.0;
+    }
+    tint(255, transp);
+    transp2 -= transpSpeed;
+    if (transp2 < 0.0) {
+        transp2 = 0.0;
+    }
+    tint(255, transp2);
+  }
+  if (transp==0) {
+    showGreet = false;
+//    if (greetMovie.time() != 0.0) {
+//        greetMovie.stop();
+//    }
+  }
+  if (transp2==0) {
+    showBye = false;
+//    if (byeMovie.time() != 0.0) {
+//        byeMovie.stop();
+//    }
+  }
+  tint(255, transp);
+  image(greetMovie, 0, 0, 1280, 720);
+  tint(255, transp2);
+  image(byeMovie, 640, 360, 640, 360);
+  tint(255, 255);
   if (showTracker) {
       // Show the image
       tracker.display();
@@ -100,6 +173,15 @@ void draw() {
     text("Near threshold: " + nt + "  Far threshold: " + ft +  " Detect  " + dt + " framerate: " + (int)frameRate + "    " + "UP: +far, DOWN: -far, RIGHT: +near, LEFT: -near. W,S: Tilt. Depth :" + displayValue + " and depth " + sensorDepth ,10,600);
   }
 }  
+
+void movieEvent(Movie m) {
+  if (m == greetMovie && showGreet){
+    m.read();
+  }
+  else if (m == byeMovie && showBye){
+    m.read();
+  }
+}
 
 void keyPressed() {
   int nt = tracker.getNearThreshold();

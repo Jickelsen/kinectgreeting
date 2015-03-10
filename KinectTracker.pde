@@ -86,9 +86,8 @@ class KinectTracker {
       loc = new PVector(sumX/count,sumY/count);
       dep = depthSum/(float)count;
       // dep -= dep*detectThreshold/count;
-      detected = (count > detectThreshold);
     }
-
+    detected = (count > detectThreshold);
     // Interpolating the location, doing it arbitrarily for now
     lerpedLoc.x = PApplet.lerp(lerpedLoc.x, loc.x, 0.3f);
     lerpedLoc.y = PApplet.lerp(lerpedLoc.y, loc.y, 0.3f);
