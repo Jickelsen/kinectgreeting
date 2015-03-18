@@ -34,11 +34,11 @@ int   WINDOWSIZE = 1280,
       measureDelay = 200,
       fps = 60,
       kAngle = 0,
-      frameSkip = 4;
+      frameSkip = 1;
       
 //int numFrames = 150/frameSkip;
 //int numFrames = 655/frameSkip;
-int numFrames = floor(371/frameSkip);
+int numFrames = floor(366/frameSkip);
       
 Image[] imagesArray = new Image[numFrames];
 Movie greetMovie,
@@ -79,8 +79,8 @@ void setup() {
       imagesArray[i] = new Image(images_dir_path+filenames[i*frameSkip], imageSize);
   }
   kinect = new Kinect(this);
-  tracker = new KinectTracker(400, 700, 0.03);
-//  tracker = new KinectTracker(700, 1035, 0.03);
+//  tracker = new KinectTracker(400, 700, 0.03);
+  tracker = new KinectTracker(850, 1028, 0.015);
   ragdollsetup();
 }
   
@@ -95,12 +95,12 @@ void draw() {
     sensorDepth = tracker.getNormalizedDepth();
     measureTimer = 0;
   }
-  if (tracker.detected && sensorDepth < 0.15) {
-    frameLerp -= 1000.0/(float)(1000* frameRate);
+  if (tracker.detected && sensorDepth < 0.52) {
+    frameLerp -= 1000.0/(float)(6000* frameRate);
      if (frameLerp < 0) { frameLerp = 0;}
   }
   else if (tracker.detected) {
-     frameLerp = PApplet.lerp(frameLerp, bezierPoint(0.0, 0.0, 0.0, 1.0, sensorDepth) 
+     frameLerp = PApplet.lerp(frameLerp, bezierPoint(0.0, 0.1, 0.0, 1.0, sensorDepth) 
 , 1000.0/(float)(measureDelay * frameRate));
   }
  else {

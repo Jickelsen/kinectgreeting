@@ -5,8 +5,8 @@ class KinectTracker {
   // Size of kinect image
   int kw = 640;
   int kh = 480;
-  float dw = 0.3;
-  float dh = 0.3;
+  float dw = 0.4;
+  float dh = 0.2;
   int startX;
   int endX;
   int startY;
