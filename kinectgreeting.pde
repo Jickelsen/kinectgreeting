@@ -34,11 +34,11 @@ int   WINDOWSIZE = 1280,
       measureDelay = 200,
       fps = 60,
       kAngle = 0,
-      frameSkip = 1;
+      frameSkip = 2;
       
 //int numFrames = 150/frameSkip;
 //int numFrames = 655/frameSkip;
-int numFrames = floor(366/frameSkip);
+int numFrames = floor(377/frameSkip);
       
 Image[] imagesArray = new Image[numFrames];
 Movie greetMovie,
