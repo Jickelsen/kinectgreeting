@@ -1,19 +1,9 @@
-// Modified by Jacob Michelsen tii.se February 2015. ORIGINAL CREDITS:
 
-//This code is modded from Sequential by James Patterson. 
-//Displaying a sequence of images creates the illusion of motion.
-//Images are loaded and each is displayed individually in a loop.
+// Modified by Jacob Michelsen tii.se February 2015. Based off the following work:
 
-// Daniel Shiffman
-// Tracking the average location beyond a given depth threshold
-// Thanks to Dan O'Sullivan
-// http://www.shiffman.net
-// https://github.com/shiffman/libfreenect/tree/master/wrappers/java/processing
-
-/* 
-  Ragdoll Aquarium
-  Made by BlueThen on February 21, 2011
-*/
+// This code is modded from Sequential by James Patterson. 
+// Displaying a sequence of images creates the illusion of motion.
+// Images are loaded and each is displayed individually in a loop.
 
 import org.openkinect.*;
 import org.openkinect.processing.*;
@@ -31,14 +21,14 @@ int   WINDOWSIZE = 1280,
       imageSize = 1280,
       lastTime = 0,
       measureTimer = 0,
-      measureDelay = 200,
+      measureDelay = 250,
       fps = 60,
       kAngle = 0,
-      frameSkip = 2;
+      frameSkip = 80;
       
 //int numFrames = 150/frameSkip;
 //int numFrames = 655/frameSkip;
-int numFrames = floor(377/frameSkip);
+int numFrames = floor(375/frameSkip);
       
 Image[] imagesArray = new Image[numFrames];
 Movie greetMovie,
@@ -53,7 +43,7 @@ float screenAspect = 16.0/9.0,
       transp2 = 0.0,
       transpSpeed = 6;
 
-boolean showTracker = true;
+boolean showTracker = false;
 PImage bgImg;
 
 boolean showGreet = false,
@@ -81,7 +71,6 @@ void setup() {
   kinect = new Kinect(this);
 //  tracker = new KinectTracker(400, 700, 0.03);
   tracker = new KinectTracker(850, 1028, 0.015);
-  ragdollsetup();
 }
   
 void draw() {
@@ -92,7 +81,7 @@ void draw() {
   if (measureTimer >= measureDelay) {
     // Run the tracking analysis
     tracker.track();
-    sensorDepth = tracker.getNormalizedDepth();
+    sensorDepth = tracker.getNormalizedClosest();
     measureTimer = 0;
   }
   if (tracker.detected && sensorDepth < 0.52) {
@@ -213,7 +202,9 @@ void keyPressed() {
   if (key == 'w') {
     kAngle++;
   } else if (key == 's') {
-    kAngle--;
+//    kAngle--;
+stop();
+      setup();
   }
   if (key == 'a') {
     dt-=1000;
@@ -223,12 +214,15 @@ void keyPressed() {
     tracker.setDetectThreshold(dt);
   }
   kAngle = constrain(kAngle, 0, 30);
-  kinect.tilt(kAngle);
+//  kinect.tilt(kAngle);
   
 }
 
 void stop() {
   tracker.quit();
+  kinect = null;
+  tracker = null;
   super.stop();
+  setup();
 }
 

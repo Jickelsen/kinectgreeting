@@ -1,6 +1,9 @@
 class KinectTracker {
-
-
+// Daniel Shiffman
+// Tracking the average location beyond a given depth threshold
+// Thanks to Dan O'Sullivan
+// http://www.shiffman.net
+// https://github.com/shiffman/libfreenect/tree/master/wrappers/java/processing
 
   // Size of kinect image
   int kw = 640;
@@ -14,6 +17,9 @@ class KinectTracker {
   int nearThreshold;
   int farThreshold;
   int detectThreshold;
+  int closest = -100;
+  int farthest = -100;
+  float closestNorm = 0.8;
 
   // Raw location
   PVector loc;
@@ -43,8 +49,6 @@ class KinectTracker {
     startY = (int)((1.0-dh)*kh/2);
     endY = kh-startY;
 
-    // We could skip processing the grayscale image for efficiency
-    // but this example is just demonstrating everything
     kinect.processDepthImage(true);
 
     display = createImage(kw,kh,PConstants.RGB);
@@ -74,13 +78,29 @@ class KinectTracker {
 
         // Testing against farThreshold and nearThreshold
         if (rawDepth < farThreshold && rawDepth > nearThreshold) {
+          int normalized = rawDepth-nearThreshold; 
+          if (closest ==-100) {
+             closest = normalized; 
+          }
+          else if (normalized < closest) {
+              closest = normalized; 
+          }
+          if (farthest ==-100) {
+             farthest = normalized; 
+          }
+          else if (normalized > farthest) {
+              farthest = normalized; 
+          }
           sumX += x;
           sumY += y;
           count++;
-          depthSum += (rawDepth-nearThreshold);
+          depthSum += normalized;
         }
       }
     }
+    closestNorm = ((float)closest+(float)(farthest-closest)*0.2)/(float)(farThreshold-nearThreshold);
+    closest = -100;
+    farthest = -100;
     // As long as we found something
     if (count != 0) {
       loc = new PVector(sumX/count,sumY/count);
@@ -108,6 +128,19 @@ class KinectTracker {
   
   float getNormalizedDepth() {
     float returnValue = dep/(float)(farThreshold-nearThreshold);
+    if (returnValue > 1) {
+      return 1.0; 
+    }
+    else if (returnValue < 0) {
+      return 0.0; 
+    }
+    else {
+      return returnValue;
+    }
+  }
+  
+  float getNormalizedClosest() {
+    float returnValue =  closestNorm;
     if (returnValue > 1) {
       return 1.0; 
     }
@@ -158,6 +191,7 @@ class KinectTracker {
 
   void quit() {
     kinect.quit();
+    kinect.stop();
   }
 
   int getNearThreshold() {

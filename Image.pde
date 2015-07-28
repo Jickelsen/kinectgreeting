@@ -45,11 +45,11 @@ String[] findImgFiles( String[] filenames ) {
   };
 
   if( images_dir_path.charAt( images_dir_path.length() -1 ) == '/' ) {
-    println(" looks like there's a slash at the end of the dir path… no need for modifications ");
+//    println(" looks like there's a slash at the end of the dir path… no need for modifications ");
   }
   else {
     images_dir_path = images_dir_path+'/' ;
-    println(" aha! it's missing a slash at the end, let's add one. \n\t images_dir_path is now = "+images_dir_path );
+//    println(" aha! it's missing a slash at the end, let's add one. \n\t images_dir_path is now = "+images_dir_path );
   }
 
   // ____ go through all the filenames
