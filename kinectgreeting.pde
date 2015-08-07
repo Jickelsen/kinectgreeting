@@ -5,7 +5,7 @@
 // Displaying a sequence of images creates the illusion of motion.
 // Images are loaded and each is displayed individually in a loop.
 
-import org.openkinect.*;
+//import org.openkinect.*;
 import org.openkinect.processing.*;
 import processing.video.*;
 
@@ -24,7 +24,7 @@ int   WINDOWSIZE = 1280,
       measureDelay = 250,
       fps = 60,
       kAngle = 0,
-      frameSkip = 80;
+      frameSkip = 40;
       
 //int numFrames = 150/frameSkip;
 //int numFrames = 655/frameSkip;
@@ -50,7 +50,7 @@ boolean showGreet = false,
         showBye = false;
      
 void setup() {
-  size(WINDOWSIZE, (int)(WINDOWSIZE/screenAspect));
+  fullScreen();
   frameRate(fps);
   greetMovie = new Movie(this, "gubb_hen.mov");
   greetMovie.frameRate(24);
@@ -58,7 +58,7 @@ void setup() {
   byeMovie = new Movie(this, "gubbhen_corner.mov");
   byeMovie.frameRate(24);
   byeMovie.loop();
-  path = sketchPath;
+  path = sketchPath();
   images_dir_path = path + "/data/jpg_gothenburg_1280/";
 //  bgImg = loadImage("bg.jpg");
 //  images_dir_path = path + "/data/gbg/";
@@ -202,9 +202,9 @@ void keyPressed() {
   if (key == 'w') {
     kAngle++;
   } else if (key == 's') {
-//    kAngle--;
-stop();
-      setup();
+    kAngle--;
+//stop();
+//      setup();
   }
   if (key == 'a') {
     dt-=1000;
@@ -225,4 +225,3 @@ void stop() {
   super.stop();
   setup();
 }
-

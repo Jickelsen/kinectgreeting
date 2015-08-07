@@ -38,8 +38,7 @@ class KinectTracker {
   PImage display;
 
     KinectTracker(int pNearThreshold, int pFarThreshold, float pDetectThreshold) {
-    kinect.start();
-    kinect.enableDepth(true);
+    kinect.startDepth();
     
     nearThreshold = pNearThreshold;
     farThreshold = pFarThreshold;
@@ -49,7 +48,7 @@ class KinectTracker {
     startY = (int)((1.0-dh)*kh/2);
     endY = kh-startY;
 
-    kinect.processDepthImage(true);
+    //kinect.processDepthImage(true);
 
     display = createImage(kw,kh,PConstants.RGB);
 
@@ -190,8 +189,8 @@ class KinectTracker {
   }
 
   void quit() {
-    kinect.quit();
-    kinect.stop();
+    //kinect.quit();
+    //kinect.stop();
   }
 
   int getNearThreshold() {
